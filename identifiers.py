@@ -1,11 +1,15 @@
 import sys
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from os import PathLike
 from pprint import pp
 from symtable import symtable, SymbolTable
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
-Identifiers = Dict[str, List[str]]
+Category = str
+Namespace = str
+Name = str
+Identifier = namedtuple('Identifier', ['namespace', 'name'])
+Identifiers = Dict[Category, List[Identifier]]
 
 
 def parse_identifiers(source_file: PathLike) -> Identifiers:
@@ -17,13 +21,13 @@ def parse_identifiers(source_file: PathLike) -> Identifiers:
 def collect(st: SymbolTable, namespace: str = '') -> Identifiers:
     identifiers = defaultdict(list)
 
-    sym_name = namespace + st.get_name()
+    identifier = Identifier(namespace, st.get_name())
     if st.get_type() == 'function':
-        identifiers['fns'].append(sym_name)
+        identifiers['fns'].append(identifier)
     if st.get_type() == 'class':
-        identifiers['classes'].append(sym_name)
+        identifiers['classes'].append(identifier)
     if st.get_type() == 'module':
-        identifiers['modules'].append(sym_name)
+        identifiers['modules'].append(identifier)
 
     namespace += f"{st.get_name()}."
 
@@ -31,19 +35,19 @@ def collect(st: SymbolTable, namespace: str = '') -> Identifiers:
         if s.is_namespace():
             continue
 
-        sym_name = namespace + s.get_name()
+        identifier = Identifier(namespace, s.get_name())
 
         if s.is_parameter():
-            identifiers['fn_params'].append(sym_name)
+            identifiers['fn_params'].append(identifier)
         elif s.is_local():
             if st.get_type() == 'function':
-                identifiers['fn_locals'].append(sym_name)
+                identifiers['fn_locals'].append(identifier)
             elif st.get_type() == 'class':
-                identifiers['cls_locals'].append(sym_name)
+                identifiers['cls_locals'].append(identifier)
             elif st.get_type() == 'module':
-                identifiers['mod_locals'].append(sym_name)
+                identifiers['mod_locals'].append(identifier)
         elif s.is_global():
-            identifiers['globals'].append(sym_name)
+            identifiers['globals'].append(identifier)
 
     # recurse
     for c in st.get_children():
