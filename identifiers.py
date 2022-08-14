@@ -5,6 +5,10 @@ from pprint import pp
 from symtable import symtable, SymbolTable
 from typing import List, Dict, Tuple
 
+import os
+
+from glob import glob
+
 Category = str
 Namespace = str
 Name = str
@@ -12,14 +16,23 @@ Identifier = namedtuple('Identifier', ['namespace', 'name'])
 Identifiers = Dict[Category, List[Identifier]]
 
 
-def parse_identifiers(source_file: PathLike) -> Identifiers:
-    with open(source_file) as f:
-        st = symtable(f.read(), str(source_file), 'exec')
-    return collect(st)
+def parse_identifiers(path: PathLike) -> Identifiers:
+    if os.path.isdir(path):
+        files = glob(f"{path}/**/*.py", recursive=True)
+    else:
+        files = [path]
 
-
-def collect(st: SymbolTable, namespace: str = '') -> Identifiers:
     identifiers = defaultdict(list)
+    for fn in files:
+        with open(fn) as f:
+            st = symtable(f.read(), str(path), 'exec')
+            collect(st, '', identifiers)
+
+    return identifiers
+
+
+def collect(st: SymbolTable, namespace: str = '',
+            identifiers: Identifiers = defaultdict(list)) -> Identifiers:
 
     identifier = Identifier(namespace, st.get_name())
     if st.get_type() == 'function':
@@ -51,11 +64,7 @@ def collect(st: SymbolTable, namespace: str = '') -> Identifiers:
 
     # recurse
     for c in st.get_children():
-        nested_identifiers = collect(c, namespace)
-        for k in nested_identifiers.keys():
-            identifiers[k].extend(nested_identifiers[k])
-
-    return identifiers
+        collect(c, namespace, identifiers)
 
 
 if __name__ == '__main__':
