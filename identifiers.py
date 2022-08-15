@@ -44,6 +44,8 @@ def find_relative_source_files(path):
     return [str(PurePath(f).relative_to(path)) for f in files]
 
 
+# TODO: Handle lambdas ("lambda")
+# TODO: Handle list/dict comprehensions ("listcomp", "dictcomp")
 def parse_identifiers(st: SymbolTable,
                       package: str,
                       module: str,
@@ -91,4 +93,5 @@ def parse_identifiers(st: SymbolTable,
 
 
 if __name__ == '__main__':
-    pp(parse_identifiers_from_files(sys.argv[1], find_relative_source_files(sys.argv[1])))
+    identifiers = parse_identifiers_from_files(sys.argv[1], find_relative_source_files(sys.argv[1]))
+    pp(identifiers)
