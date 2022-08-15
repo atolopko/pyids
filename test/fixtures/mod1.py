@@ -2,9 +2,11 @@ from os.path import join
 
 MY_CONST = 1
 
+global1 = 1
+
 
 def module_fn(fn_arg1, fn_arg2):
-    fn_local1 = fn_arg1 + fn_arg2
+    fn_local1 = fn_arg1 + fn_arg2 + global1
     return fn_local1
 
 
@@ -26,5 +28,6 @@ class MyClassName:
 
 
 if __name__ == '__main__':
-    print(MyClassName().class_fn(1, 2))
-    print(module_fn(1, 2))
+    mod_var1 = 1
+    print(MyClassName().class_fn(mod_var1, 2))
+    print(module_fn(mod_var1, 2))
