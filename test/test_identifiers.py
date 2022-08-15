@@ -3,7 +3,7 @@ from symtable import symtable
 
 from pytest import fixture
 
-from identifiers import package_and_module_names, find_relative_source_files, collect, Identifier
+from identifiers import package_and_module_names, find_relative_source_files, parse_identifiers, Identifier
 
 
 def test_find_source_files():
@@ -31,7 +31,7 @@ def mod1_symtable():
 def test_collect(mod1_symtable):
     identifiers = defaultdict(set)
 
-    collect(mod1_symtable, '', 'mod1', identifiers)
+    parse_identifiers(mod1_symtable, '', 'mod1', identifiers)
 
     assert identifiers == {'classes': {Identifier(package='', module='mod1', namespace='', name='MyClassName'),
                                        Identifier(package='', module='mod1', namespace='MyClassName', name='NestedCls'),

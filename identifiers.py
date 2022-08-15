@@ -24,13 +24,13 @@ def package_and_module_names(src_file) -> Tuple[str, str]:
     return package, module
 
 
-def parse_identifiers(root_path, source_files: Iterable[str]) -> Identifiers:
+def parse_identifiers_from_files(root_path, source_files: Iterable[str]) -> Identifiers:
     identifiers = defaultdict(set)
     for fn in source_files:
         with open(os.path.join(root_path, fn)) as f:
             st = symtable(f.read(), fn, 'exec')
             pkg, module = package_and_module_names(fn)
-            collect(st, pkg, module, identifiers)
+            parse_identifiers(st, pkg, module, identifiers)
 
     return identifiers
 
@@ -44,11 +44,11 @@ def find_relative_source_files(path):
     return [str(PurePath(f).relative_to(path)) for f in files]
 
 
-def collect(st: SymbolTable,
-            package: str,
-            module: str,
-            identifiers: Identifiers,
-            namespace=''):
+def parse_identifiers(st: SymbolTable,
+                      package: str,
+                      module: str,
+                      identifiers: Identifiers,
+                      namespace=''):
 
     identifier = Identifier(package, module, namespace, st.get_name())
     if st.get_type() == 'function':
@@ -87,8 +87,8 @@ def collect(st: SymbolTable,
 
     # recurse
     for c in st.get_children():
-        collect(c, package, module, identifiers, namespace)
+        parse_identifiers(c, package, module, identifiers, namespace)
 
 
 if __name__ == '__main__':
-    pp(parse_identifiers(sys.argv[1], find_relative_source_files(sys.argv[1])))
+    pp(parse_identifiers_from_files(sys.argv[1], find_relative_source_files(sys.argv[1])))
