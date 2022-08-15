@@ -29,38 +29,44 @@ def mod1_symtable():
 
 
 def test_collect(mod1_symtable):
-    identifiers = defaultdict(list)
+    identifiers = defaultdict(set)
 
     collect(mod1_symtable, '', 'mod1', identifiers)
 
-    assert identifiers == {
-        'classes': [Identifier(package='', module='mod1', namespace='', name='MyClassName'),
-                    Identifier(package='', module='mod1', namespace='MyClassName', name='NestedCls'),
-                    Identifier(package='', module='mod1', namespace='MyClassName.class_fn',
-                               name='NestedFnCls')],
-        'cls_locals': [
-            Identifier(package='', module='mod1', namespace='MyClassName', name='class_var')],
-        'fn_locals': [Identifier(package='', module='mod1', namespace='module_fn', name='fn_local1'),
-                      Identifier(package='', module='mod1', namespace='MyClassName.class_fn',
-                                 name='fn_local1')],
-        'fn_params': [Identifier(package='', module='mod1', namespace='module_fn', name='fn_arg1'),
-                      Identifier(package='', module='mod1', namespace='module_fn', name='fn_arg2'),
-                      Identifier(package='', module='mod1', namespace='MyClassName.NestedCls.foo',
-                                 name='self'),
-                      Identifier(package='', module='mod1', namespace='MyClassName.class_fn',
-                                 name='self'),
-                      Identifier(package='', module='mod1', namespace='MyClassName.class_fn',
-                                 name='fn_arg1'),
-                      Identifier(package='', module='mod1', namespace='MyClassName.class_fn',
-                                 name='fn_arg2'),
-                      Identifier(package='', module='mod1',
-                                 namespace='MyClassName.class_fn.NestedFnCls.bar', name='self')],
-        'fns': [Identifier(package='', module='mod1', namespace='', name='module_fn'),
-                Identifier(package='', module='mod1', namespace='MyClassName.NestedCls', name='foo'),
-                Identifier(package='', module='mod1', namespace='MyClassName', name='class_fn'),
-                Identifier(package='', module='mod1', namespace='MyClassName.class_fn.NestedFnCls',
-                           name='bar')],
-        'mod_locals': [Identifier(package='', module='mod1', namespace='', name='MY_CONST'),
-                       Identifier(package='', module='mod1', namespace='', name='global1'),
-                       Identifier(package='', module='mod1', namespace='', name='mod_var1')],
-        'modules': [Identifier(package='', module='mod1', namespace='', name='top')]}
+    assert identifiers == {'classes': {Identifier(package='', module='mod1', namespace='', name='MyClassName'),
+                                       Identifier(package='', module='mod1', namespace='MyClassName', name='NestedCls'),
+                                       Identifier(package='', module='mod1', namespace='MyClassName.fn2',
+                                                  name='NestedFnCls')},
+                           'cls_vars': {
+                               Identifier(package='', module='mod1', namespace='MyClassName', name='class_var')},
+                           'fn_params': {Identifier(package='', module='mod1', namespace='MyClassName.NestedCls.foo',
+                                                    name='self'),
+                                         Identifier(package='', module='mod1', namespace='MyClassName.fn1',
+                                                    name='fn1_arg1'),
+                                         Identifier(package='', module='mod1', namespace='MyClassName.fn1',
+                                                    name='fn1_arg2'),
+                                         Identifier(package='', module='mod1', namespace='MyClassName.fn1',
+                                                    name='self'),
+                                         Identifier(package='', module='mod1', namespace='MyClassName.fn2',
+                                                    name='fn2_arg1'),
+                                         Identifier(package='', module='mod1', namespace='MyClassName.fn2',
+                                                    name='fn2_arg2'),
+                                         Identifier(package='', module='mod1', namespace='MyClassName.fn2',
+                                                    name='self'),
+                                         Identifier(package='', module='mod1',
+                                                    namespace='MyClassName.fn2.NestedFnCls.bar', name='self'),
+                                         Identifier(package='', module='mod1', namespace='module_fn', name='fn_arg1'),
+                                         Identifier(package='', module='mod1', namespace='module_fn', name='fn_arg2')},
+                           'fn_vars': {
+                               Identifier(package='', module='mod1', namespace='MyClassName.fn1', name='fn1_local1'),
+                               Identifier(package='', module='mod1', namespace='module_fn', name='fn_local1')},
+                           'fns': {Identifier(package='', module='mod1', namespace='', name='module_fn'),
+                                   Identifier(package='', module='mod1', namespace='MyClassName', name='fn1'),
+                                   Identifier(package='', module='mod1', namespace='MyClassName', name='fn2'),
+                                   Identifier(package='', module='mod1', namespace='MyClassName.NestedCls', name='foo'),
+                                   Identifier(package='', module='mod1', namespace='MyClassName.fn2.NestedFnCls',
+                                              name='bar')},
+                           'globals': {Identifier(package='', module='mod1', namespace='', name='MY_CONST'),
+                                       Identifier(package='', module='mod1', namespace='', name='global1'),
+                                       Identifier(package='', module='mod1', namespace='', name='mod_var1')},
+                           'modules': {Identifier(package='', module='mod1', namespace='', name='top')}}

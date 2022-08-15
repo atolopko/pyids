@@ -5,7 +5,7 @@ from glob import iglob
 from pathlib import PurePath
 from pprint import pp
 from symtable import symtable, SymbolTable
-from typing import List, Dict, Tuple, Iterable
+from typing import Dict, Tuple, Iterable, Set
 
 import builtins
 
@@ -15,7 +15,7 @@ Category = str
 Namespace = str
 Name = str
 Identifier = namedtuple('Identifier', ['package', 'module', 'namespace', 'name'])
-Identifiers = Dict[Category, List[Identifier]]
+Identifiers = Dict[Category, Set[Identifier]]
 
 
 def package_and_module_names(src_file) -> Tuple[str, str]:
@@ -25,7 +25,7 @@ def package_and_module_names(src_file) -> Tuple[str, str]:
 
 
 def parse_identifiers(root_path, source_files: Iterable[str]) -> Identifiers:
-    identifiers = defaultdict(list)
+    identifiers = defaultdict(set)
     for fn in source_files:
         with open(os.path.join(root_path, fn)) as f:
             st = symtable(f.read(), fn, 'exec')
@@ -52,11 +52,11 @@ def collect(st: SymbolTable,
 
     identifier = Identifier(package, module, namespace, st.get_name())
     if st.get_type() == 'function':
-        identifiers['fns'].append(identifier)
+        identifiers['fns'].add(identifier)
     if st.get_type() == 'class':
-        identifiers['classes'].append(identifier)
+        identifiers['classes'].add(identifier)
     if st.get_type() == 'module':
-        identifiers['modules'].append(identifier)
+        identifiers['modules'].add(identifier)
 
     if st.get_name() != 'top':
         namespace += '.' if namespace else ''
@@ -73,18 +73,17 @@ def collect(st: SymbolTable,
             pass
         elif s.is_imported():
             pass
-        elif s.is_parameter():
-            identifiers['fn_params'].append(identifier)
-        elif s.is_local():
-            if st.get_type() == 'function':
-                identifiers['fn_locals'].append(identifier)
-            elif st.get_type() == 'class':
-                identifiers['cls_locals'].append(identifier)
-            elif st.get_type() == 'module':
-                identifiers['mod_locals'].append(identifier)
-        elif s.is_global():
-            pass # this are _usages_ of global variables, not the declaration
-            # identifiers['globals'].append(identifier)
+        elif st.get_type() == 'module':
+            assert s.is_global()
+            identifiers['globals'].add(identifier)
+        elif st.get_type() == 'function':
+            if s.is_parameter():
+                identifiers['fn_params'].add(identifier)
+            elif s.is_local():
+                identifiers['fn_vars'].add(identifier)
+        elif st.get_type() == 'class':
+            if s.is_local():
+                identifiers['cls_vars'].add(identifier)
 
     # recurse
     for c in st.get_children():

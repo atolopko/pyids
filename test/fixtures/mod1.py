@@ -17,14 +17,15 @@ class MyClassName:
         def foo(self):
             return 1
 
-    def class_fn(self, fn_arg1, fn_arg2):
+    def fn1(self, fn1_arg1, fn1_arg2):
+        fn1_local1 = self.class_var + fn1_arg1 + fn1_arg2
+        return fn1_local1
 
+    def fn2(self, fn2_arg1, fn2_arg2):
         class NestedFnCls:
             def bar(self):
-                return 1
-
-        fn_local1 = self.class_var + fn_arg1 + fn_arg2
-        return fn_local1
+                return self.class_var + fn2_arg1 + fn2_arg2
+        return NestedFnCls().bar()
 
 
 if __name__ == '__main__':
